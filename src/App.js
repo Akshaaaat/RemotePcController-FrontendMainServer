@@ -5,10 +5,8 @@ import Login from './pages/Login';
 import PcList from './components/PcList';
 import Register from './pages/Register';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthContext } from './context/AuthContext';
 import MoreFunctions from './components/MoreFunctions';
 function App() {
-  const {currentUser} = useContext(AuthContext);
 
   return (
     <div className="App">

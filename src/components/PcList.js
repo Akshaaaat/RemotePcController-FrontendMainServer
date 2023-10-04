@@ -1,59 +1,24 @@
 import { Link, useNavigate } from "react-router-dom";
 import {useState, useEffect} from "react"
 import "./pc.css"
+import { shuthiber } from "../pages/shutdownhiberfunctions";
+const backEndUrl='http://192.168.189.137:3000'
+
 const PcList = () => {
-  const navigate= useNavigate()
-  const backEndUrl='http://localhost:3000'
-  const handleShutdown = async (deviceId) => {
-    console.log("shuttng down", deviceId)
-  }
+    const navigate= useNavigate()
+    const handleShutHiber = async (url, task, id) =>{
+    try {
+        await shuthiber(url, task, id)
+        //window.location.reload()
+    } catch (error) {
+        console.log(error)   
+    }        
+}
 
-  const handleHibernate = async (deviceId) => {
-    console.log("hibernating", deviceId)
-  }
+const refreshPage = () =>{
+    window.location.reload()
+}
   
-
-  const dummy=[
-    {
-      deviceName: "Desktop 1",
-      batteryPercentage: "93",
-      batteryStatus: "193",
-      deviceId: "6435ff2ceef41be206eb8615",
-      properties: {
-        brand: "HP",
-        processor: "Intel Core i5",
-        RAM: "8GB",
-        storage: "256GB SSD",
-        display: "23.8-inch",
-      },
-    },
-    {
-      deviceName: "Desktop 2",
-      batteryPercentage: "93",
-      deviceId: "234",
-      batteryStatus: "193",
-      properties: {
-        brand: "Dell",
-        processor: "Intel Core i7",
-        RAM: "16GB",
-        storage: "512GB SSD",
-        display: "27-inch",
-      },
-    },
-    {
-      deviceName: "Desktop 3",
-      batteryPercentage: "93",
-      deviceId: "23wrgr4",
-      batteryStatus: "193",
-      properties: {
-        brand: "Lenovo",
-        processor: "AMD Ryzen 5",
-        RAM: "12GB",
-        storage: "1TB HDD",
-        display: "21.5-inch",
-      },
-    },
-  ]
   const [computers, setcomputers] = useState([])
   
   const loadPage = async ()=>{
@@ -63,7 +28,7 @@ const PcList = () => {
 
     try {
         const data={
-            userName: "golu@gmail.com"
+            userName: localStorage.getItem('techshillausername')
         }
 
         const options={
@@ -80,7 +45,6 @@ const PcList = () => {
         
         const response = await fetch(urlOfHit, options)
         const res= await response.json()
-        console.log("server se ye aaya", res)
 
         if(res){
             setcomputers(res)
@@ -95,24 +59,44 @@ const PcList = () => {
   useEffect(()=>{
     loadPage()
   }, [])
-
-    console.log(computers, 'f')
       
-   
+
 
     return (
         <div className="pclist">
-            {computers?.map((computer, index) => (
-                <div className="pc-card" key={index}>
-                    <div className="pcName">{computer.deviceName}</div>
-                    <div className="pcFunc">
-                        <button className="pcFuncBtn" onClick={()=>{handleShutdown(computer._id)}}>Shut Down</button>
-                        <button className="pcFuncBtn" onClick={()=>{handleHibernate(computer._id)}}>Hibernate</button>
+            <div className="refreshDiv">
+                <span className="material-symbols-outlined refresh-btn ref-2" onClick={refreshPage}>refresh</span>
+            </div>
+            <div className="listofPC">
+            {
+                (Array.isArray(computers))?
+                (computers?.map((computer, index) => (
+                    <div className={`pc-card ${(computer.active===false?'color-grey':'pc-card-color')}`} key={index}>
+                        <div className="pcName">{computer.deviceName}</div>
+                        { 
+                            (computer.active===false)?
+                            (
+                                <div>
+                                    <h3>PC currently Incactive</h3>
+                                </div>
+                            ):(
+                                <div>
+                                    <div className="pcFunc">
+                                        <button className="pcFuncBtn" onClick={()=>{handleShutHiber(computer.url, "shutdown", computer._id)}}>Shut Down</button>
+                                        <button className="pcFuncBtn" onClick={()=>{handleShutHiber(computer.url, "hibernate", computer._id)} }>Hibernate</button>
+                                    </div>
+                                    <Link to={`/moreinfo/${computer._id}`} ><button className="MoreInfoBtn">MoreInfo</button></Link>
+                                </div>
+                            )
+                        }
                     </div>
-                    <Link to={`/moreinfo/${computer._id}`} ><button className="MoreInfoBtn">MoreInfo</button></Link>
-                </div>
-            ))
+                ))):
+                (
+                    <h2>Loading</h2>
+                )
             }
+            </div>
+       
         </div>
     )
 }

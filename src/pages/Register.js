@@ -2,7 +2,7 @@ import "./css.css"
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-const backEndUrl='http://localhost:3000'
+const backEndUrl='http://192.168.189.137:3000'
 
 function Register() {
     const navigate = useNavigate()
@@ -24,11 +24,12 @@ function Register() {
     
         const response = await fetch(backEndUrl+"/api/auth/createuser", options)
         const res= await response.json()
-        
-        if(res.auth_token){
+        const auth_token=res['auth-token']
+        if(auth_token){
             //Save the auth token and redirect on the other site
             console.log("authentication successful")
-            localStorage.setItem('techshillaauthtoken', res.auth_token);
+            localStorage.setItem('techshillaauthtoken', auth_token);
+            localStorage.setItem('techshillausername', name)
             navigate('/')
         }
 
@@ -64,7 +65,7 @@ function Register() {
     return (
         <div className="Register-page">
             <div className="Regsiter-box">
-                <div className="appName">AppName</div>
+                <div className="appName">Cross Control</div>
                 <div className="page-type">Register</div>
                 <form onSubmit={handleSubmit}>
                     <input type="email" placeholder="Enter your Email" />
